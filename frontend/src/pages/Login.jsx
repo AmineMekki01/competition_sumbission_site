@@ -72,7 +72,7 @@ function Login({ setIsAuthenticated }) {
       const data = await loginUser({ email: teamEmail, password:password, role:role});
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('user_id', data.user_id);
-
+      localStorage.setItem('role', role);
       setIsAuthenticated(true);
       navigate('/leaderboard');
     } catch (error) {

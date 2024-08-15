@@ -62,3 +62,24 @@ def create_submission(
     db.commit()
     db.refresh(db_submission)
     return db_submission
+
+
+def create_jury_score(db: Session, team_id: int, jury_id: int, score: float):
+    jury_score = db.query(models.JuryScore).filter_by(team_id=team_id, jury_id=jury_id).first()
+    
+    if jury_score:
+        jury_score.score = score
+    else:
+        jury_score = models.JuryScore(team_id=team_id, jury_id=jury_id, score=score)
+        db.add(jury_score)
+    
+    db.commit()
+    db.refresh(jury_score)
+    return jury_score
+
+
+def get_average_jury_score(db: Session, team_id: int):
+    scores = db.query(models.JuryScore).filter_by(team_id=team_id).all()
+    if not scores:
+        return None
+    return sum([score.score for score in scores]) / len(scores)

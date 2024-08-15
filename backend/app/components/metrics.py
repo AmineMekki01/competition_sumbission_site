@@ -17,3 +17,10 @@ def calculate_metrics(submission_path: str, ground_truth_path: str):
     f1 = float(f1_score(y_true, y_pred, average='binary'))
 
     return accuracy, precision, recall, f1
+
+def calculate_final_score(accuracy, jury_score, weight_accuracy=0.7, weight_jury=0.3):
+    if accuracy is None:
+        accuracy = 0
+    if jury_score is None:
+        jury_score = 0
+    return weight_accuracy * accuracy + weight_jury * jury_score

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getLeaderboard } from '../api';
+import { getLeaderboard, submitScore } from '../api';
 import styled from 'styled-components';
 
 const LeaderboardWrapper = styled.div`
@@ -16,72 +16,121 @@ const Title = styled.h2`
   color: #333;
 `;
 
-const List = styled.ul`
-  list-style-type: none;
-  padding: 0;
+const Table = styled.table`
   width: 100%;
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
+  border-collapse: collapse;
+  text-align: left;
 `;
 
-const ListItem = styled.li`
-  background-color: white;
+const Th = styled.th`
   padding: 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 8px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background-color: #61dafb;
+  color: white;
+  border: 1px solid #ddd;
 `;
 
-const TeamName = styled.span`
-  font-weight: bold;
-  color: #333;
+const Td = styled.td`
+  padding: 1rem;
+  border: 1px solid #ddd;
 `;
 
-const Scores = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+const Input = styled.input`
+  padding: 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
 `;
 
-const Score = styled.span`
-  color: #61dafb;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
+const Button = styled.button`
+  padding: 0.5rem 1rem;
+  background-color: #61dafb;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 
-  &:first-child {
-    margin-top: 0;
+  &:hover {
+    background-color: #21a1f1;
   }
 `;
 
 function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState([]);
+  const [scores, setScores] = useState({});
+  const role = localStorage.getItem('role');
+  const user_id = localStorage.getItem('user_id');
 
   useEffect(() => {
     async function fetchLeaderboard() {
-      const data = await getLeaderboard();
+      const data = await getLeaderboard(role);
       setLeaderboard(data);
-      console.log("leaderboard data: ", data);
     }
     fetchLeaderboard();
-  }, []);
+  }, [role]);
+
+  const handleScoreChange = (team_id, value) => {
+    setScores((prevScores) => ({
+      ...prevScores,
+      [team_id]: value
+    }));
+  };
+
+  const handleScoreSubmit = async (team_id) => {
+    const score = scores[team_id];
+    if (score !== undefined && score >= 0 && score <= 10) {
+      try {
+        await submitScore(team_id, score, user_id);
+        alert(`Score submitted successfully for team ${team_id}`);
+        const updatedLeaderboard = await getLeaderboard(role);
+        setLeaderboard(updatedLeaderboard);
+      } catch (error) {
+        alert("There was an error submitting the score. Please try again.");
+      }
+    } else {
+      alert("Please enter a valid score between 0 and 10");
+    }
+  };
 
   return (
     <LeaderboardWrapper>
       <Title>Leaderboard</Title>
-      <List>
-        {leaderboard.map((entry, index) => (
-          <ListItem key={index}>
-            <TeamName>{entry.team_name}</TeamName>
-            <Scores>
-              <Score>Accuracy: {entry.accuracy ? entry.accuracy.toFixed(2) : "N/A"}</Score>
-              <Score>Jury Score: {entry.jury_score}</Score>
-            </Scores>
-          </ListItem>
-        ))}
-      </List>
+      <Table>
+        <thead>
+          <tr>
+            <Th>Team Name</Th>
+            <Th>Accuracy</Th>
+            <Th>Jury Score</Th>
+            <Th>Final Score</Th>
+            <Th>Action</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {leaderboard.map((entry, index) => (
+            <tr key={index}>
+              <Td>{entry.team_name}</Td>
+              <Td>{entry.accuracy ? entry.accuracy.toFixed(2) : "N/A"}</Td>
+              <Td>{entry.jury_score !== null ? entry.jury_score.toFixed(2) : "N/A"}</Td>
+              <Td>{entry.final_score !== null ? entry.final_score.toFixed(2) : "N/A"}</Td>
+              <Td>
+                {entry.can_score && (
+                  <>
+                    <Input 
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={scores[entry.team_id] || ""}
+                      onChange={(e) => handleScoreChange(entry.team_id, parseFloat(e.target.value))}
+                    />
+                    <Button onClick={() => handleScoreSubmit(entry.team_id)}>Submit Score</Button>
+                  </>
+                )}
+              </Td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
     </LeaderboardWrapper>
   );
 }

@@ -56,7 +56,6 @@ function Submit() {
     e.preventDefault();
     const token = localStorage.getItem('token');
     const user_id = localStorage.getItem('user_id');
-    console.log("team_uuid retrieved from localStorage: ", user_id);
     if (!token || !user_id) {
       alert('Please login first');
       return;

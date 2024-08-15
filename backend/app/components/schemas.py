@@ -51,3 +51,16 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+class JuryScore(BaseModel):
+    id: int
+    team_id: int
+    jury_id: int
+    score: float
+
+    class Config:
+        orm_mode = True
+        
+class ScoreInput(BaseModel):
+    team_id: int
+    score: float
+    user_id: int

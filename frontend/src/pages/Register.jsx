@@ -73,7 +73,6 @@ function Register() {
     try {
       
       await registerUser({ name, email, password, role });
-      console.log("role: ", role);
       alert('Registered successfully');
     } catch (error) {
       alert('Error registering user');
