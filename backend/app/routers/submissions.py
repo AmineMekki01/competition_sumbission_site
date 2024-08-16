@@ -2,7 +2,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from app.components import models, schemas, crud, metrics
+from app.components import models, schemas, crud, metrics, auth_helpers
 from app.components.database import get_db
 
 router = APIRouter()
@@ -24,3 +24,14 @@ async def submit_file(user_id: str = Form(...), file: UploadFile = File(...), db
     
     return submission
 
+
+
+@router.get("/submission_history/", response_model=List[schemas.Submission])
+def get_submission_history(
+    user_id : int,
+    db: Session = Depends(get_db),
+):
+    submissions = db.query(models.Submission).filter(models.Submission.team_id == user_id).all()
+    if not submissions:
+        raise HTTPException(status_code=404, detail="No submissions found")
+    return submissions
