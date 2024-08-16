@@ -64,7 +64,7 @@ function Leaderboard() {
 
   useEffect(() => {
     async function fetchLeaderboard() {
-      const data = await getLeaderboard(role);
+      const data = await getLeaderboard(user_id, role);
       setLeaderboard(data);
     }
     fetchLeaderboard();
@@ -83,7 +83,7 @@ function Leaderboard() {
       try {
         await submitScore(team_id, score, user_id);
         alert(`Score submitted successfully for team ${team_id}`);
-        const updatedLeaderboard = await getLeaderboard(role);
+        const updatedLeaderboard = await getLeaderboard(user_id, role);
         setLeaderboard(updatedLeaderboard);
       } catch (error) {
         alert("There was an error submitting the score. Please try again.");
@@ -101,9 +101,11 @@ function Leaderboard() {
           <tr>
             <Th>Team Name</Th>
             <Th>Accuracy</Th>
-            <Th>Jury Score</Th>
+            <Th>Average Jury Score</Th>
+            <Th>N Jury voted :</Th>
             <Th>Final Score</Th>
-            <Th>Action</Th>
+            {role === 'jury' && <Th>Current Jury Score</Th>}
+            {role === 'jury' && <Th>Action</Th>}
           </tr>
         </thead>
         <tbody>
@@ -112,21 +114,27 @@ function Leaderboard() {
               <Td>{entry.team_name}</Td>
               <Td>{entry.accuracy ? entry.accuracy.toFixed(2) : "N/A"}</Td>
               <Td>{entry.jury_score !== null ? entry.jury_score.toFixed(2) : "N/A"}</Td>
+              <Td>{entry.num_of_jury_voted !== null ? entry.num_of_jury_voted : "N/A"}</Td>
               <Td>{entry.final_score !== null ? entry.final_score.toFixed(2) : "N/A"}</Td>
-              <Td>
-                {entry.can_score && (
-                  <>
-                    <Input 
-                      type="number"
-                      min="0"
-                      max="10"
-                      value={scores[entry.team_id] || ""}
-                      onChange={(e) => handleScoreChange(entry.team_id, parseFloat(e.target.value))}
-                    />
-                    <Button onClick={() => handleScoreSubmit(entry.team_id)}>Submit Score</Button>
-                  </>
-                )}
-              </Td>
+              {role === 'jury' && (
+                <Td>{entry.current_jury_score !== null ? entry.current_jury_score.toFixed(2) : "N/A"}</Td>
+              )}
+              {role === 'jury' && (
+                <Td>
+                  {entry.can_score && (
+                    <>
+                      <Input 
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={scores[entry.team_id] || ""}
+                        onChange={(e) => handleScoreChange(entry.team_id, parseFloat(e.target.value))}
+                      />
+                      <Button onClick={() => handleScoreSubmit(entry.team_id)}>Submit Score</Button>
+                    </>
+                  )}
+                </Td>
+              )}
             </tr>
           ))}
         </tbody>

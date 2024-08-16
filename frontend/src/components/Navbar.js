@@ -44,6 +44,7 @@ const LogoutButton = styled.button`
 `;
 
 function Navbar({ isAuthenticated, handleLogout }) {
+  const role = localStorage.getItem('role');
   return (
     <Nav>
       <NavList>
@@ -54,7 +55,12 @@ function Navbar({ isAuthenticated, handleLogout }) {
           </>
         ) : (
           <>
-            <NavItem><NavLink to="/submit">Submit</NavLink></NavItem>
+            {role === 'team' && (
+              <>
+                <NavItem><NavLink to="/submit">Submit</NavLink></NavItem>
+                <NavItem><NavLink to="/submission-history">Submission History</NavLink></NavItem>
+              </>
+            )}
             <NavItem><NavLink to="/leaderboard">Leaderboard</NavLink></NavItem>
             <NavItem><LogoutButton onClick={handleLogout}>Logout</LogoutButton></NavItem>
           </>

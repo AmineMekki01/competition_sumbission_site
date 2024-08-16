@@ -33,11 +33,11 @@ export const submitFile = async (file, token, user_id) => {
   return response.data;
 };
 
-export const getLeaderboard = async (role) => {
+export const getLeaderboard = async (user_id, role) => {
   const token = localStorage.getItem('token');
   const response = await axios.get(`${API_URL}/leaderboard/`, {
     headers: { Authorization: `Bearer ${token}` },
-    params: { user_role: role }
+    params: {jury_id: user_id, user_role: role }
   });
   return response.data;
 };
@@ -50,6 +50,17 @@ export const submitScore = async (team_id, score, user_id) => {
     user_id
   }, {
     headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+export const getSubmissionHistory = async (user_id) => {
+  const token = localStorage.getItem('token');
+  const response = await axios.get(`${API_URL}/submission_history/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: { user_id: user_id }
   });
   return response.data;
 };

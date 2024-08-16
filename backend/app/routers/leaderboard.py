@@ -9,12 +9,14 @@ from app.components.metrics import calculate_final_score
 router = APIRouter()
 
 @router.get("/leaderboard/")
-def get_leaderboard(db: Session = Depends(get_db), user_role: str = None):
+def get_leaderboard(jury_id : int, db: Session = Depends(get_db), user_role: str = None):
     teams = db.query(models.Team).all()
     leaderboard = []
     for team in teams:
         accuracy = max((sub.accuracy for sub in team.submissions), default=None)
-        jury_score = crud.get_average_jury_score(db, team_id=team.id)
+        jury_score, num_of_jury_voted = crud.get_average_jury_score(db, team_id=team.id)
+        
+        current_jury_score = crud.get_jury_team_scores(db, team_id=team.id, jury_id=jury_id)
 
         final_score = calculate_final_score(accuracy, jury_score)
 
@@ -23,7 +25,9 @@ def get_leaderboard(db: Session = Depends(get_db), user_role: str = None):
             "team_name": team.name,
             "accuracy": accuracy,
             "jury_score": jury_score,
+            "num_of_jury_voted": num_of_jury_voted,
             "final_score": final_score,
+            "current_jury_score": current_jury_score,
             "can_score": user_role == schemas.RoleEnum.JURY
         }
         leaderboard.append(entry)

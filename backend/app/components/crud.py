@@ -82,4 +82,10 @@ def get_average_jury_score(db: Session, team_id: int):
     scores = db.query(models.JuryScore).filter_by(team_id=team_id).all()
     if not scores:
         return None
-    return sum([score.score for score in scores]) / len(scores)
+    return sum([score.score for score in scores]) / len(scores), len(scores)
+
+def get_jury_team_scores(db: Session, jury_id: int, team_id: int):
+    score = db.query(models.JuryScore).filter_by(team_id=team_id, jury_id=jury_id).first()
+    if not score:
+        return None
+    return score.score
