@@ -3,10 +3,19 @@ import axios from 'axios';
 const API_URL = 'http://localhost:8000';
 
 export const registerUser = async (userData) => {
+  try {
     const response = await axios.post(`${API_URL}/register/`, userData);
-    
     return response.data;
-  };
+  } catch (error) {
+    if (error.response) {
+      throw new Error(error.response.data.detail || 'Registration failed');
+    } else if (error.request) {
+      throw new Error('No response received from server');
+    } else {
+      throw new Error('Error in request setup');
+    }
+  }
+};
 
   export const loginUser = async (credentials) => {
     const response = await axios.post(`${API_URL}/token`, credentials, {

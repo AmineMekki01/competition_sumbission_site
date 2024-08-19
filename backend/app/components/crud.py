@@ -89,3 +89,25 @@ def get_jury_team_scores(db: Session, jury_id: int, team_id: int):
     if not score:
         return None
     return score.score
+
+
+def is_user_exist(db: Session, email: str, name: str):
+    team_exist = db.query(models.Team).filter(
+        (models.Team.email == email) | (models.Team.name == name)
+    ).first()
+    jury_exist = db.query(models.JuryMember).filter(
+        (models.JuryMember.email == email) | (models.JuryMember.name == name)
+    ).first()
+    
+    email_exists = False
+    name_exists = False
+
+    if team_exist:
+        email_exists = team_exist.email == email
+        name_exists = team_exist.name == name
+
+    if jury_exist:
+        email_exists = email_exists or jury_exist.email == email
+        name_exists = name_exists or jury_exist.name == name
+
+    return email_exists, name_exists

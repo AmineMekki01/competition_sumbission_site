@@ -67,15 +67,20 @@ function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('team');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
     try {
       
       await registerUser({ name, email, password, role });
       alert('Registered successfully');
     } catch (error) {
-      alert('Error registering user');
+      console.log(error);
+      setErrorMessage(error.message);
+    
     }
   };
 
@@ -83,6 +88,7 @@ function Register() {
     <RegisterWrapper>
       <Form onSubmit={handleSubmit}>
         <Title>Register</Title>
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>} {/* Display error message */}
         <Input
           type="text"
           placeholder="Name"

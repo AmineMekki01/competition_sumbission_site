@@ -10,21 +10,22 @@ router = APIRouter()
 
 @router.post("/register/")
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    email_exists, name_exists = crud.is_user_exist(db, email=user.email, name=user.name)
+
+    if email_exists and name_exists:
+        raise HTTPException(status_code=400, detail="Both email and username are already registered")
+    elif email_exists:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    elif name_exists:
+        raise HTTPException(status_code=400, detail="Username already registered")
+
     if user.role == schemas.RoleEnum.TEAM:
-        user_data = crud.get_user_by_email(db, user_role=user.role, user_email=user.email)
-        if user_data:
-            print("Email already registered")
-            raise HTTPException(status_code=400, detail="Email already registered")
         new_user = crud.create_team(db, user)
     elif user.role == schemas.RoleEnum.JURY:
-        jury_data = crud.get_user_by_email(db, user_role=user.role, user_email=user.email)
-        if jury_data:
-            print("Email already registered")
-            raise HTTPException(status_code=400, detail="Email already registered")
         new_user = crud.create_jury_member(db, user)
     else:
-        print(f'Invalid role provided: {user.role}')
         raise HTTPException(status_code=400, detail="Invalid role provided")
+
     return new_user
 
 

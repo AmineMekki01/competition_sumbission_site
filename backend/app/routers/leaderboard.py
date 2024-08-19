@@ -14,7 +14,13 @@ def get_leaderboard(jury_id : int, db: Session = Depends(get_db), user_role: str
     leaderboard = []
     for team in teams:
         accuracy = max((sub.accuracy for sub in team.submissions), default=None)
-        jury_score, num_of_jury_voted = crud.get_average_jury_score(db, team_id=team.id)
+        result = crud.get_average_jury_score(db, team_id=team.id)
+        
+        if result is None:
+            jury_score = None
+            num_of_jury_voted = 0
+        else:
+            jury_score, num_of_jury_voted = result
         
         current_jury_score = crud.get_jury_team_scores(db, team_id=team.id, jury_id=jury_id)
 
